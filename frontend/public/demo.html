@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Project Udyam Digital - Interactive Motion Walkthrough</title>
+  <style>
+    :root {
+      --bg: #0a0e17;
+      --card-bg: #111827;
+      --red: #e11900;
+      --cyan: #00b9f5;
+      --green: #10b981;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .demo-player {
+      width: 100%;
+      max-width: 960px;
+      background: #111827;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    }
+    .player-header {
+      background: #161f30;
+      padding: 0.85rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .window-dots {
+      display: flex;
+      gap: 6px;
+    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+
+    .viewport {
+      height: 480px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2.5rem;
+      text-align: center;
+      background: radial-gradient(circle at 50% 30%, #1e293b 0%, #0a0e17 80%);
+      position: relative;
+    }
+    .scene-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+    .scene-desc {
+      font-size: 1rem;
+      color: var(--muted);
+      max-width: 600px;
+      line-height: 1.5;
+    }
+    .scene-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: rgba(225, 25, 0, 0.15);
+      color: #ff4d30;
+      border: 1px solid rgba(225, 25, 0, 0.3);
+    }
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      background: #0f172a;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: rgba(255, 255, 255, 0.15); }
+    .btn-red {
+      background: linear-gradient(135deg, #e11900 0%, #ff4d30 100%);
+      border: none;
+    }
+    .progress-bar-container {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .progress-bar {
+      height: 100%;
+      background: var(--red);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="demo-player">
+    <div class="player-header">
+      <div class="window-dots">
+        <div class="dot dot-red"></div>
+        <div class="dot dot-yellow"></div>
+        <div class="dot dot-green"></div>
+      </div>
+      <div style="font-size: 0.85rem; color: #94a3b8; font-weight: 600;">
+        Airtel SYNC · Macro Motion Product Walkthrough
+      </div>
+      <div>
+        <a href="http://127.0.0.1:3000" target="_blank" style="color: #38bdf8; font-size: 0.8rem; text-decoration: none; font-weight: 600;">
+          Launch Live App ↗
+        </a>
+      </div>
+    </div>
+
+    <div class="progress-bar-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="viewport" id="viewport">
+      <div class="scene-badge" id="sceneBadge">STEP 1 OF 6</div>
+      <div class="scene-title" id="sceneTitle">Intelligent AI Needs Discovery</div>
+      <div class="scene-desc" id="sceneDesc">
+        Dr. Vivek Menon selects 'Clinic / Pharmacy' and confirms GSTIN '32TTNXB7384T1ZW'. Grok AI activates the 9.6% high-intent activation pipeline.
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" onclick="prevStep()">‹ Previous</button>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-red" id="playBtn" onclick="togglePlay()">▶ Play Demo</button>
+      </div>
+      <button class="btn" onclick="nextStep()">Next ›</button>
+    </div>
+  </div>
+
+  <script>
+    const scenes = [
+      {
+        badge: "STEP 1 OF 6: NEEDS DISCOVERY",
+        title: "Intelligent AI Needs Discovery",
+        desc: "A small business owner selects their category via mobile chips. Voice/Hindi toggle enabled. GSTIN check triggers high-conversion enterprise queue."
+      },
+      {
+        badge: "STEP 2 OF 6: GROK AI BUNDLE",
+        title: "Grok AI Bundle & Live Quote",
+        desc: "Recommends Biz Fibre 300 + Cloud Suite tailored to clinic uptime needs. Add-ons toggle live with automatic dependency checks and 10% annual discount."
+      },
+      {
+        badge: "STEP 3 OF 6: SMART KYC",
+        title: "Instant OCR & DPDP Act 2023",
+        desc: "Automated OCR extracts GSTIN & Udyam registrations, verifies 90-day utility bill recency, checks blurriness, and secures explicit consent."
+      },
+      {
+        badge: "STEP 4 OF 6: PAYTM SANDBOX",
+        title: "Paytm Sandbox UPI & AutoPay",
+        desc: "Instant UPI intent simulation with token authorization and recurring monthly mandate for seamless zero-paperwork subscription."
+      },
+      {
+        badge: "STEP 5 OF 6: ORDER TRACKER",
+        title: "Order Tracker & Status AI Assistant",
+        desc: "5-stage visual progress timeline showing assigned field engineer Rajesh Kumar, with an integrated conversational bot answering status questions."
+      },
+      {
+        badge: "STEP 6 OF 6: OPS CONSOLE",
+        title: "Enterprise Ops & Priority Queue",
+        desc: "Sales dashboard analyzing 5,000 SMB leads with ML propensity scoring to generate the 'Call These 20 First' priority outreach list."
+      }
+    ];
+
+    let current = 0;
+    let timer = null;
+    let playing = false;
+
+    function render() {
+      const s = scenes[current];
+      document.getElementById('sceneBadge').textContent = s.badge;
+      document.getElementById('sceneTitle').textContent = s.title;
+      document.getElementById('sceneDesc').textContent = s.desc;
+      document.getElementById('progressBar').style.width = ((current + 1) / scenes.length * 100) + '%';
+    }
+
+    function nextStep() {
+      current = (current + 1) % scenes.length;
+      render();
+    }
+
+    function prevStep() {
+      current = (current - 1 + scenes.length) % scenes.length;
+      render();
+    }
+
+    function togglePlay() {
+      playing = !playing;
+      const btn = document.getElementById('playBtn');
+      if (playing) {
+        btn.textContent = '❚❚ Pause';
+        timer = setInterval(nextStep, 3500);
+      } else {
+        btn.textContent = '▶ Play Demo';
+        clearInterval(timer);
+      }
+    }
+
+    render();
+  </script>
+</body>
+</html>
